@@ -2,12 +2,10 @@ package Controller;
 
 import io.javalin.Javalin;
 import io.javalin.http.Context;
-import io.javalin.Javalin;
-import io.javalin.http.Context;
 import Model.Account;
 import Model.Message;
 import Service.AccountService;
-//import Service.MessageService;
+import Service.MessageService;
 
 /**
  * TODO: You will need to write your own endpoints and handlers for your controller. The endpoints you will need can be
@@ -16,9 +14,11 @@ import Service.AccountService;
  */
 public class SocialMediaController {
     AccountService accountService;
+    MessageService messageService;
 
      public SocialMediaController(){
         this.accountService = new AccountService();
+        this.messageService = new MessageService();
      }
     /**
      * In order for the test cases to work, you will need to write the endpoints in the startAPI() method, as the test
@@ -28,6 +28,8 @@ public class SocialMediaController {
     public Javalin startAPI() {
         Javalin app = Javalin.create();
         app.post("/register", this::postRegisterHandler);
+        app.post("/login", this::postLoginHandler);
+        app.post("/messages", this::postMessageHandler);
 
         return app;
     }
@@ -45,7 +47,7 @@ public class SocialMediaController {
 
             if (newAccount != null) {
                 // Registration successful
-                context.json(newAccount); // Respond with the new account data as JSON
+                context.json(newAccount);
             } else {
                 // Registration failed, return 400 status
                 context.status(400);
@@ -53,6 +55,38 @@ public class SocialMediaController {
         } catch (Exception e) {
             // Catch any exceptions and return 400 status in case of issues
             context.status(400);
+        }
+    }
+
+    private void postLoginHandler(Context context) {
+        try {
+            Account account = context.bodyAsClass(Account.class);
+            Account loggedInAccount = accountService.loginAccount(account.getUsername(), account.getPassword());
+
+            if (loggedInAccount != null) {
+                context.json(loggedInAccount); // Successful login, respond with the account
+            } else {
+                context.status(401); // Unauthorized if login failed
+            }
+        } catch (Exception e) {
+            context.status(401); // Return 401 status if there's an exception
+        }
+    }
+
+    private void postMessageHandler(Context context){
+        try {
+            Message message = context.bodyAsClass(Message.class); // Get message from request body
+    
+            // Validate and attempt to create the message
+            Message newMessage = messageService.createMessage(message);
+    
+            if (newMessage != null) {
+                context.json(newMessage); // Message creation successful
+            } else {
+                context.status(400); // Message creation failed, return 400 status
+            }
+        } catch (Exception e) {
+            context.status(400); // Return 400 in case of issues
         }
     }
 }

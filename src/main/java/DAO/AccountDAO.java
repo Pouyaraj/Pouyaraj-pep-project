@@ -3,14 +3,11 @@ import Model.Account;
 import Util.ConnectionUtil;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class AccountDAO {
     public Account addAccount(Account account){
         Connection connection = ConnectionUtil.getConnection();
         try {
-            // Corrected column name "username"
             String sql = "INSERT INTO account (username, password) VALUES (?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
@@ -53,6 +50,36 @@ public class AccountDAO {
         return false;
     }
 
-    
+    public static boolean userExists(int accountId) {
+        Connection connection = ConnectionUtil.getConnection();
+        String sql = "SELECT account_id FROM Account WHERE account_id = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, accountId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            return resultSet.next(); // Returns true if an account with the given ID exists
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return false;
+    }
+
+    public Account getAccount(String username){
+        String sql = "SELECT * FROM account WHERE username = ?";
+        try (Connection connection = ConnectionUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            
+            preparedStatement.setString(1, username);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    int generatedAccountId = resultSet.getInt("account_id");
+                    String password = resultSet.getString("password");
+                    return new Account(generatedAccountId, username, password);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
     
 }

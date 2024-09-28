@@ -34,5 +34,15 @@ public class AccountService {
 
         return accountDao.addAccount(newAccount); // Persist the account
     }
+
+    public Account loginAccount(String username, String password){
+        Account account = accountDao.getAccount(username);
+
+           // Check if the account exists and if the passwords match
+        if (account != null && account.getPassword().equals(password)) {
+            return account; // Successful login, return the account
+        }
+        return null; // Login failed
+    }
     
 }
