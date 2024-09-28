@@ -6,6 +6,9 @@ import Model.Account;
 import Model.Message;
 import Service.AccountService;
 import Service.MessageService;
+import java.util.List;
+
+import DAO.MessageDAO;
 
 /**
  * TODO: You will need to write your own endpoints and handlers for your controller. The endpoints you will need can be
@@ -30,6 +33,7 @@ public class SocialMediaController {
         app.post("/register", this::postRegisterHandler);
         app.post("/login", this::postLoginHandler);
         app.post("/messages", this::postMessageHandler);
+        app.get("/messages", this::getAllMessageHandler);
 
         return app;
     }
@@ -89,4 +93,9 @@ public class SocialMediaController {
             context.status(400); // Return 400 in case of issues
         }
     }
+
+    private void getAllMessageHandler(Context context){
+        context.json(messageService.getAllMessages());
+    }
+    
 }
