@@ -28,11 +28,14 @@ public class MessageService {
             return null;
         }
 
-        // Call the DAO method to create the message
         return messageDAO.createMessage(message);
     }
 
     public List<Message> getAllMessages(){
         return messageDAO.getAllMessages();
+    }
+
+    public Message getMessageById(int message_id){
+        return messageDAO.getById(message_id);
     }
 }

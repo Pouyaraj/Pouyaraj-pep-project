@@ -19,10 +19,10 @@ public class MessageDAO {
 
             preparedStatement.executeUpdate();
 
-            ResultSet pkeyResultSet = preparedStatement.getGeneratedKeys();
-            if (pkeyResultSet.next()) {
-                int generatedMessageId = pkeyResultSet.getInt(1);
-                message.setMessage_id(generatedMessageId); // Set generated message_id
+            ResultSet rs = preparedStatement.getGeneratedKeys();
+            if (rs.next()) {
+                int generatedMessageId = rs.getInt(1);
+                message.setMessage_id(generatedMessageId);
                 return message;
             }
         } catch (Exception e) {
@@ -50,6 +50,29 @@ public class MessageDAO {
             System.out.println(e.getMessage());
         }
         return messages;
+    }
+
+    public Message getById(int message_id){
+        Connection connection = ConnectionUtil.getConnection();
+        try {
+            String sql = "SELECT * FROM message WHERE message_id = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, message_id);
+    
+            ResultSet rs = preparedStatement.executeQuery();
+    
+            if (rs.next()) {
+                Message message = new Message();
+                message.setMessage_id(rs.getInt("message_id"));
+                message.setPosted_by(rs.getInt("posted_by"));
+                message.setMessage_text(rs.getString("message_text"));
+                message.setTime_posted_epoch(rs.getLong("time_posted_epoch"));
+                return message; 
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return null; 
     }
 
 }
