@@ -7,8 +7,7 @@ import Model.Message;
 import Service.AccountService;
 import Service.MessageService;
 import java.util.List;
-
-import DAO.MessageDAO;
+import java.util.Map;
 
 /**
  * TODO: You will need to write your own endpoints and handlers for your controller. The endpoints you will need can be
@@ -36,6 +35,8 @@ public class SocialMediaController {
         app.get("/messages", this::getAllMessageHandler);
         app.get("/messages/{message_id}", this::getMessageByIdHandler);
         app.delete("/messages/{message_id}", this::deleteMessageHandler);
+        app.patch("/messages/{message_id}", this::patchMessageHandler);
+        app.get("/accounts/{account_id}/messages", this::getMessagesByAccountHandler); 
 
         return app;
     }
@@ -48,18 +49,17 @@ public class SocialMediaController {
         try {
             Account account = context.bodyAsClass(Account.class);
 
-            // Validate the account and attempt registration
             Account newAccount = accountService.registerAccount(account.getUsername(), account.getPassword());
 
             if (newAccount != null) {
-                // Registration successful
+
                 context.json(newAccount);
             } else {
-                // Registration failed, return 400 status
+
                 context.status(400);
             }
         } catch (Exception e) {
-            // Catch any exceptions and return 400 status in case of issues
+
             context.status(400);
         }
     }
@@ -70,29 +70,28 @@ public class SocialMediaController {
             Account loggedInAccount = accountService.loginAccount(account.getUsername(), account.getPassword());
 
             if (loggedInAccount != null) {
-                context.json(loggedInAccount); // Successful login, respond with the account
+                context.json(loggedInAccount); 
             } else {
-                context.status(401); // Unauthorized if login failed
+                context.status(401);
             }
         } catch (Exception e) {
-            context.status(401); // Return 401 status if there's an exception
+            context.status(401);
         }
     }
 
     private void postMessageHandler(Context context){
         try {
-            Message message = context.bodyAsClass(Message.class); // Get message from request body
+            Message message = context.bodyAsClass(Message.class);
     
-            // Validate and attempt to create the message
             Message newMessage = messageService.createMessage(message);
     
             if (newMessage != null) {
-                context.json(newMessage); // Message creation successful
+                context.json(newMessage);
             } else {
-                context.status(400); // Message creation failed, return 400 status
+                context.status(400);
             }
         } catch (Exception e) {
-            context.status(400); // Return 400 in case of issues
+            context.status(400);
         }
     }
 
@@ -129,4 +128,34 @@ public class SocialMediaController {
         }
     }
     
+    private void patchMessageHandler(Context context) {
+        int messageId = Integer.parseInt(context.pathParam("message_id"));
+    
+        Map<String, Object> body = context.bodyAsClass(Map.class);
+    
+        String newMessageText = (String) body.get("message_text");
+    
+        if (newMessageText == null || newMessageText.isBlank() || newMessageText.length() > 255) {
+            context.status(400);
+            return;
+        }
+    
+        Message updatedMessage = messageService.updateMessageText(messageId, newMessageText);
+    
+        if (updatedMessage != null) {
+            context.json(updatedMessage);
+            context.status(200);
+        } else {
+            context.status(400);
+        }
+    }
+    
+
+    private void getMessagesByAccountHandler(Context context) {
+            String accountIdStr = context.pathParam("account_id");
+            int accountId = Integer.parseInt(accountIdStr);
+            List<Message> messages = messageService.getMessagesByAccountId(accountId);
+
+            context.json(messages);
+    }
 }

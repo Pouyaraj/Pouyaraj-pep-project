@@ -42,4 +42,22 @@ public class MessageService {
     public void deleteMessage(int messageId) {
         messageDAO.deleteMessage(messageId);
     }
+
+    public Message updateMessageText(int messageId, String newMessageText) {
+        Message existingMessage = messageDAO.getById(messageId);
+    
+        if (existingMessage == null || newMessageText == null || newMessageText.isBlank() || newMessageText.length() > 255) {
+            return null;
+        }
+    
+        existingMessage.setMessage_text(newMessageText);
+        messageDAO.updateMessage(existingMessage);
+    
+        return existingMessage;
+    }
+    
+    
+    public List<Message> getMessagesByAccountId(int accountId) {
+        return messageDAO.getMessagesByAccountId(accountId);
+    }
 }

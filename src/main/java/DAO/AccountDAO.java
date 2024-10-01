@@ -11,19 +11,15 @@ public class AccountDAO {
             String sql = "INSERT INTO account (username, password) VALUES (?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-            // Set the values for the prepared statement
             preparedStatement.setString(1, account.getUsername());
             preparedStatement.setString(2, account.getPassword());
             
-            // Execute the update
             preparedStatement.executeUpdate();
 
-            // Get the generated account_id
             ResultSet pkeyResultSet = preparedStatement.getGeneratedKeys();
             if (pkeyResultSet.next()) {
                 int generatedAccountId = pkeyResultSet.getInt(1);
                 
-                // Return the new Account object with the generated account_id
                 return new Account(generatedAccountId, account.getUsername(), account.getPassword());
             }
         } catch (SQLException e) {
@@ -40,7 +36,6 @@ public class AccountDAO {
             preparedStatement.setString(1, username);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    // If count is greater than 0, the username is taken
                     return resultSet.getInt(1) > 0;
                 }
             }
@@ -56,7 +51,7 @@ public class AccountDAO {
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, accountId);
             ResultSet resultSet = preparedStatement.executeQuery();
-            return resultSet.next(); // Returns true if an account with the given ID exists
+            return resultSet.next(); 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
